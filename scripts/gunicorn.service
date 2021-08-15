@@ -1,0 +1,15 @@
+
+# file location: /etc/systemd/system/gunicorn.service
+[Unit]
+Description=Gunicorn Web Server as Unit Service Systemd - FINEDAPI
+After=network.target
+
+[Service]
+User=jan
+Group=jan
+WorkingDirectory=/media/commlab/TenTB/home/jan/LearnFastAPI/FINED-service
+Environment="PATH=/media/commlab/TenTB/home/jan/.conda/envs/fined-service/bin"
+ExecStart=/media/commlab/TenTB/home/jan/.conda/envs/fined-service/bin/gunicorn  --config /media/commlab/TenTB/home/jan/LearnFastAPI/FINED-service/gunicorn.py app.main:app
+
+[Install]
+WantedBy=multi-user.target
