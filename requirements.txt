@@ -6,3 +6,4 @@ jinja2
 aiofiles
 requests
 python-multipart
+pyyaml

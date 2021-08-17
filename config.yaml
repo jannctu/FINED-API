@@ -1,0 +1,16 @@
+#FINED 
+fined:
+  state: "dev" # or prod
+  title: "FINED Edge Detection"
+  description: "FINED Service"
+  version: "0.0.1"
+  debug_mode: True 
+
+api:
+  prefix: "/_fined/api/v1"
+# Logging
+logging:
+  logsdir: "logs"
+  filename: "fined.log"
+  formatter: "%(asctime)s - %(thread)d - %(name)s - %(levelname)s - %(message)s"
+  rotation: "midnight"

@@ -16,12 +16,16 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
+from app.config import settings
+from app.initializer import logger_instance
 from app.modules.fined.inference_api import get_FINED_edge
 import cv2
 
+logger = logger_instance.get_logger(__name__)
+
 #os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
-app = FastAPI(title='FINED Edge Detection')
+app = FastAPI(title=settings.fined.title)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
@@ -51,7 +55,9 @@ def index(request: Request):
 @app.post("/predict/image")
 async def predict_api(file: UploadFile = File(...)):
     extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
+    logger.info("Requesting upload image prediction")
     if not extension:
+        logger.warn("User upload non-image file")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image must be jpg or png format!")
 
     contents = await file.read()
@@ -61,12 +67,15 @@ async def predict_api(file: UploadFile = File(...)):
 
     prediction = get_FINED_edge(img,timestr)
     res, im_png = cv2.imencode(".png", prediction)
+    logger.info("Request upload image prediction success")
     return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
 
 @app.get("/predict/url")
 async def predict_url(img_url):
     extension = img_url.split(".")[-1] in ("jpg", "jpeg", "png")
+    logger.info("Requesting url image prediction")
     if not extension:
+        logger.warn("Url is non-image file")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image must be jpg or png format!")
 
     im = Image.open(requests.get(img_url, stream=True).raw)
@@ -77,6 +86,7 @@ async def predict_url(img_url):
     open_cv_image = open_cv_image[:, :, ::-1].copy() 
     prediction = get_FINED_edge(open_cv_image,timestr)
     res, im_png = cv2.imencode(".png", prediction)
+    logger.info("Request url image prediction success")
     return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
 
 if __name__ == '__main__':
